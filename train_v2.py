@@ -1,6 +1,7 @@
 import numpy as np
 from utils2 import *
-from tensorflow.python.keras.layers import *
+from tensorflow.keras.layers import *
+from tensorflow.keras.models import Model
 # tf.config.experimental_run_functions_eagerly(True)
 # ------------------------------------------
 #  Load and generate simulation data
@@ -44,8 +45,9 @@ model.summary()
 #  Train Your Model
 # -----------------------
 reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=20, min_lr=0.00005)
-checkpoint = tf.keras.callbacks.ModelCheckpoint('./temp_trained.h5', monitor='val_loss',
+checkpoint = tf.keras.callbacks.ModelCheckpoint('./temp_trained.weights.h5', monitor='val_loss',
                                        verbose=0, save_best_only=True, mode='min', save_weights_only=True)
+                                       
 model.fit(x=[H_input, H, SNR], y=H, batch_size=256,
           epochs=50000, verbose=2, validation_split=0.1, callbacks=[reduce_lr, checkpoint])
 

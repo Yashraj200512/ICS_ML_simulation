@@ -14,9 +14,12 @@ P = 1   # the normalized transmit power
 # ---------------------
 
 # transfer the phase to complex-valued analog beamformer
+# transfer the phase to complex-valued analog beamformer
 def trans_Vrf(temp):
-    v_real = tf.cos(temp)
-    v_imag = tf.sin(temp)
+    # Force the input to be float32 to prevent complex64 mismatch
+    temp_float = tf.cast(temp, tf.float32) 
+    v_real = tf.cos(temp_float)
+    v_imag = tf.sin(temp_float)
     vrf = tf.cast(tf.complex(v_real, v_imag), tf.complex64)
     return vrf
 
