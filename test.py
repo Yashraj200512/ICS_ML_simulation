@@ -4,31 +4,12 @@ import tensorflow as tf
 from tensorflow.keras.layers import *
 from tensorflow.keras.models import Model
 import matplotlib.pyplot as plt
+from utils import mat_load, trans_Vrf, Rate_func_fixed, Nt
 
-Nt = 64
 
-def mat_load(path):
-    h = sio.loadmat(path + '/pcsi.mat')['pcsi']
-    h_est = sio.loadmat(path + '/ecsi.mat')['ecsi']
-    return h, h_est
+# Load data 
+H, H_est = mat_load('train_set/example/test')
 
-def trans_Vrf(temp):
-    v_real = tf.cos(temp)
-    v_imag = tf.sin(temp)
-    return tf.cast(tf.complex(v_real, v_imag), tf.complex64)
-
-# FIX: Re-written for Keras 3 to bypass the old utils.py crash
-def Rate_func_fixed(temp):
-    h, v, SNR_input = temp
-    hv = tf.reduce_sum(tf.cast(h, tf.complex64) * v, axis=1, keepdims=True)
-    rate = tf.math.log(tf.cast(1 + SNR_input / Nt * tf.pow(tf.abs(hv), 2), tf.float32)) / tf.math.log(2.0)
-    return -rate
-
-# Load data (trying both paths just in case)
-try:
-    H, H_est = mat_load('train_set/example/test')
-except:
-    H, H_est = mat_load('.')
 
 H_input = np.expand_dims(np.concatenate([np.real(H_est), np.imag(H_est)], 1), 1)
 H = np.squeeze(H)
