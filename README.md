@@ -22,6 +22,10 @@ The repository consists of two main components: data generation and neural netwo
 * **Python 3.x**: `tensorflow`, `numpy`, `scipy`, `matplotlib`
 * **MATLAB**: Required only if you wish to generate new CSI datasets or run the traditional baseline comparisons.
 
+## Acknowledgments
+
+The foundational code  was originally developed by [https://github.com/TianLin0509/BF-design-with-DL.git]
+
 
 
 
