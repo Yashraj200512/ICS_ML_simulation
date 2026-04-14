@@ -6,46 +6,52 @@ from tensorflow.keras.models import Model
 import matplotlib.pyplot as plt
 from utils import mat_load, trans_Vrf, Rate_func_fixed, Nt
 
-
-# Load data 
+# Load perfect and estimated Channel State Information (CSI) from MAT files
 H, H_est = mat_load('train_set/example/test')
 
-
+# Preprocess estimated CSI: Separate real and imaginary components and expand dimensions for the network
 H_input = np.expand_dims(np.concatenate([np.real(H_est), np.imag(H_est)], 1), 1)
 H = np.squeeze(H)
 
+# Define Keras model inputs
 imperfect_CSI = Input(name='imperfect_CSI', shape=(H_input.shape[1:4]), dtype=tf.float32)
-# FIX: Reverted to 1D shape since H is 2-dimensional (Batch_size, 64)
 perfect_CSI = Input(name='perfect_CSI', shape=(H.shape[1],), dtype=tf.complex64)
 SNR_input = Input(name='SNR_input', shape=(1,), dtype=tf.float32)
 
+# Build the Neural Network architecture for phase generation
 temp = BatchNormalization()(imperfect_CSI)
 temp = Flatten()(temp)
 temp = BatchNormalization()(temp)
 temp = Dense(256, activation='relu')(temp)
 temp = BatchNormalization()(temp)
 temp = Dense(128, activation='relu')(temp)
-phase = Dense(Nt)(temp)
+phase = Dense(Nt)(temp) # Output layer determining the phase for each antenna
 
+# Construct the hybrid beamformer and calculate the achievable rate
 V_RF = Lambda(trans_Vrf, output_shape=(Nt,))(phase)
 rate = Lambda(Rate_func_fixed, output_shape=(1,))([perfect_CSI, V_RF, SNR_input])
 
+# Compile the model (The network outputs the negative rate, allowing the optimizer to minimize it)
 model = Model(inputs=[imperfect_CSI, perfect_CSI, SNR_input], outputs=rate)
 model.compile(optimizer='adam', loss=lambda y_true, y_pred: y_pred)
 
-# Load the official pre-trained weights
+# Load pre-trained weights for the 20dB SNR scenario
 model.load_weights('./20db.h5')
 
+# Evaluate the model across a range of Signal-to-Noise Ratios (SNRs)
 rate_bfnn = []
 snr_range = range(-20, 25, 5)
+
 for snr in snr_range:
+    # Convert SNR from dB to linear scale for the capacity calculation
     SNR = np.power(10, np.ones([H.shape[0], 1]) * snr / 10)
     y = model.evaluate(x=[H_input, H, SNR], y=H, batch_size=10, verbose=0)
-    rate_bfnn.append(-y)
+    rate_bfnn.append(-y) # Revert the negative output to obtain the actual positive spectral efficiency
 
-# The correct baseline numbers calculated in MATLAB
+# Baseline performance metrics calculated via Orthogonal Matching Pursuit (OMP)
 rate_omp = [0.6981, 1.5695, 2.8526, 4.3701, 5.9825, 7.6278, 9.2838, 10.9431, 12.6036]
 
+# Plot the comparative evaluation results
 plt.figure(figsize=(8, 6))
 
 plt.plot(snr_range, rate_bfnn, label="Learning-Based Hybrid Beamforming (BFNN)", 
@@ -61,5 +67,5 @@ plt.legend(loc="upper left", fontsize=11)
 plt.grid(True, linestyle=':', alpha=0.7)
 
 plt.savefig("Final_Simulation_Result4.png", dpi=300, bbox_inches='tight')
-print("\nSuccess! Graph saved as Final_Simulation_Result.png")
+print("\nSuccess! Graph saved as Final_Simulation_Result4.png")
 plt.show()
