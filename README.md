@@ -30,3 +30,8 @@ To evaluate the model's performance on the test dataset and generate the predict
 
 ```bash
 python test.py
+
+## Acknowledgments
+
+The foundational code  was originally developed by [Tianlin0509/bf-design-with-dl]. 
+
