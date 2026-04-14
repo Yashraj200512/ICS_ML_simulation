@@ -1,31 +1,32 @@
-# Deep Learning for Beamforming and Precoding Simulation
+# Deep Learning for Beamforming and Precoding
 
-This repository contains the simulation code for evaluating deep learning-based approaches for beamforming and hybrid precoding in communication systems. The project integrates MATLAB for channel data generation and Python (TensorFlow/Keras) for designing, training, and testing the neural network models.
+## Overview
+This repository implements a Deep Learning-based approach for beamforming and hybrid precoding in Massive MIMO communication systems. The primary objective is to use neural networks to approximate the performance of traditional, non-convex mathematical optimization algorithms (such as Orthogonal Matching Pursuit) for calculating optimal precoding matrices. 
 
-## Project Structure
+By shifting the heavy computational load to a trained neural network, the system can predict highly accurate precoders significantly faster during real-world deployment, maximizing the overall Sum Rate (Spectral Efficiency).
 
-The repository consists of two main components: data generation and neural network simulation.
+## Project Architecture
+The complete system pipeline involves simulating physical channel data, training the network, and evaluating the final predictions. 
 
-### 1. Channel Generation & Baselines (MATLAB)
-* **`gen_samples.m` / `channel_gen_LOS.m`**: Scripts to generate simulated Channel State Information (CSI) datasets.
-* **`HybridPrecoding.m` / `power_allocation.m`**: Traditional baseline algorithms for comparison against the deep learning models.
-* **`.mat` files**: The generated perfect and estimated CSI datasets (`pcsi.mat`, `ecsi.mat`) used for training and testing.
+**This repository contains the finalized Inference and Evaluation pipeline:**
+* **Channel Data:** Utilizes pre-simulated Estimated Channel State Information (`ecsi.mat`) and Perfect Channel State Information (`pcsi.mat`), representing complex multi-path wireless environments.
+* **Deep Learning Inference:** Deploys a pre-trained Keras/TensorFlow model (`20db.h5`, `temp_trained.weights.h5`) to process the incoming channel data and output predicted precoders.
+* **Benchmarking:** Evaluates the neural network's predictions directly against the theoretical limits established by traditional mathematical baselines.
 
-### 2. Neural Network Simulation (Python)
-* **`train.py` & `train_v2.py`**: Scripts to build and train the neural network models using the generated CSI data.
-* **`test.py` & `test_v2.py`**: Scripts to evaluate the trained models on the test datasets.
-* **`utils.py` & `utils2.py`**: Helper functions for data loading, processing, and loss calculations.
-
-* **`.h5` files**: Saved weights of the trained models (e.g., `temp_trained.weights.h5`, `20db.h5`).
+## Repository Structure
+* **`test.py`**: The core execution script that loads the test data and passes it through the pre-trained neural network to measure performance.
+* **`utils.py`**: Essential helper functions for loading, normalizing, and formatting the MATLAB `.mat` dataset files for Python.
+* **`ecsi.mat` & `pcsi.mat`**: The testing datasets containing the thousands of simulated physical channel matrices.
+* **`20db.h5` & `temp_trained.weights.h5`**: The saved weights of the trained neural network models.
 
 ## Requirements
-* **Python 3.x**: `tensorflow`, `numpy`, `scipy`, `matplotlib`
-* **MATLAB**: Required only if you wish to generate new CSI datasets or run the traditional baseline comparisons.
+* Python 3.x
+* TensorFlow / Keras
+* NumPy
+* SciPy
 
-## Acknowledgments
+## How to Run the Simulation
+To evaluate the model's performance on the test dataset and generate the predictions, run the following command in your terminal:
 
-The foundational code  was originally developed by [https://github.com/TianLin0509/BF-design-with-DL.git]
-
-
-
-
+```bash
+python test.py
