@@ -36,7 +36,7 @@ model = Model(inputs=[imperfect_CSI, perfect_CSI, SNR_input], outputs=rate)
 model.compile(optimizer='adam', loss=lambda y_true, y_pred: y_pred)
 
 # Load pre-trained weights for the 20dB SNR scenario
-model.load_weights('./20db.h5')
+model.load_weights('./saved_weights/20db.h5')
 
 # Evaluate the model across a range of Signal-to-Noise Ratios (SNRs)
 rate_bfnn = []
@@ -66,6 +66,6 @@ plt.ylabel("Achievable Spectral Efficiency (bps/Hz)", fontsize=12)
 plt.legend(loc="upper left", fontsize=11)
 plt.grid(True, linestyle=':', alpha=0.7)
 
-plt.savefig("Final_Simulation_Result4.png", dpi=300, bbox_inches='tight')
-print("\nSuccess! Graph saved as Final_Simulation_Result4.png")
+plt.savefig("Final_Simulation_Result.png", dpi=300, bbox_inches='tight')
+print("\nSuccess! Graph saved as Final_Simulation_Result.png")
 plt.show()
